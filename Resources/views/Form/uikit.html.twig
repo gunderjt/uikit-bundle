@@ -1,0 +1,355 @@
+{% use "form_div_layout.html.twig" %}
+
+{# Widgets #}
+
+{% block form_widget %}
+    {% spaceless %}
+        {% if compound %}
+            {{ block('form_widget_compound') }}
+        {% else %}
+            {{ block('form_widget_simple') }}
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_widget %}
+
+{% block form_widget_simple %}
+    {% spaceless %}
+        {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+        {% set col_size = col_size|default(uikit_get_col_size()) %}
+        {% set icon = attr.icon is defined and attr.icon ? attr.icon : "" %}
+
+        {% if attr.col_size is defined and attr.col_size is not empty %}
+            {% set col_size = attr.col_size %}
+        {% endif %}
+
+        {% set type = type|default('text') %}
+
+        {% if layout_modifier is not sameas(false) %}
+            <div class="uk-form-controls">
+        {% endif %}
+        {% if icon is not empty %}
+            <div class="uk-form-icon">
+        {% endif %}
+
+        {% set attr = attr|merge({ 'class': (attr.class|default(''))|trim }) %}
+        {% if icon is not empty %}<i class="uk-icon-{{icon}}"></i>{% endif %}
+        <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}>  {{ block('form_help') }}
+
+        {% if icon is not empty %}
+            </div>
+        {% endif %}
+        {% if layout_modifier is not sameas(false) %}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_widget_simple %}
+
+{% block form_widget_compound %}
+    {% spaceless %}
+        <div {{ block('widget_container_attributes') }}>
+            {% if form.parent is empty %}
+                {{ block('global_form_errors') }}
+            {% endif %}
+            {{ block('form_rows') }}
+            {{ form_rest(form) }}
+        </div>
+    {% endspaceless %}
+{% endblock form_widget_compound %}
+
+{% block collection_widget %}
+    {% spaceless %}
+        {% if prototype is defined %}
+            {% set attr = attr|merge({'data-prototype': form_row(prototype) }) %}
+        {% endif %}
+        {{ block('form_widget') }}
+    {% endspaceless %}
+{% endblock collection_widget %}
+
+{% block uikit_collection_widget %}
+{% endblock %}
+
+{% block textarea_widget %}
+    {% spaceless %}
+        {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+        {% set col_size = col_size|default(uikit_get_col_size()) %}
+        {% set help = help|default('') %}
+
+        {% if attr.col_size is defined and attr.col_size is not empty %}
+            {% set col_size = attr.col_size %}
+        {% endif %}
+
+        {% if layout_modifier is not sameas(false) %}
+            <div class="uk-form-controls">
+        {% endif %}
+
+        {% set attr = attr|merge({ 'class': (attr.class|default(''))|trim }) %}
+
+        <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
+
+        {% if layout_modifier is not sameas(false) %}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock textarea_widget %}
+
+{% block percent_widget %}
+    {% spaceless %}
+        {% set type = type|default('text') %}
+        <div class="input-group">
+            {{ block('form_widget_simple') }}
+            <span class="input-group-addon">%</span>
+        </div>
+    {% endspaceless %}
+{% endblock percent_widget %}
+
+{% block choice_widget %}
+    {% spaceless %}
+        {% if expanded %}
+            {{ block('choice_widget_expanded') }}
+        {% else %}
+            {{ block('choice_widget_collapsed') }}
+        {% endif %}
+    {% endspaceless %}
+{% endblock choice_widget %}
+
+{% block choice_widget_expanded %}
+    {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+    {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-controls')|trim }) %}
+    {% set attr = layout_modifier is sameas(false) ? attr : attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-controls')|trim }) %}
+    {% spaceless %}
+        <div {{ block('widget_container_attributes') }}>
+            {% for child in form %}
+                {% if multiple %}
+                    {{ checkbox_row(child, { 'no_form_group': true, 'inline' : (attr.inline is defined and attr.inline), 'label_attr': label_attr }) }}
+                {% else %}
+                    {{ radio_row(child, { 'no_form_group': true, 'inline' : (attr.inline is defined and attr.inline), 'label_attr': label_attr  }) }}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endspaceless %}
+{% endblock choice_widget_expanded %}
+
+{% block choice_widget_collapsed %}
+    {% spaceless %}
+        {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+        {% set attr = attr|merge({ 'class': attr.class|default('')|trim }) %}
+        {% if layout_modifier is not sameas(false) %}
+            <div class="uk-form-controls">
+        {% endif %}
+            <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+                {% if placeholder is not none %}
+                    <option {% if required %} disabled="disabled"{% if value is empty %} selected="selected"{% endif %}{% endif %} value="">{{ placeholder|trans({}, translation_domain) }}</option>
+                {% endif %}
+                {% if preferred_choices|length > 0 %}
+                    {% set options = preferred_choices %}
+                    {{ block('choice_widget_options') }}
+                    {% if choices|length > 0 and separator is not none %}
+                        <option disabled="disabled">{{ separator }}</option>
+                    {% endif %}
+                {% endif %}
+                {% set options = choices %}
+                {{ block('choice_widget_options') }}
+            </select>
+        {% if layout_modifier is not sameas(false) %}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock choice_widget_collapsed %}
+
+{% block checkbox_row %}
+    {% spaceless %}
+        {% set checkboxdata %}
+        {% if label is not same as (false) %}
+            {% if not compound %}
+                {% set label_attr = label_attr|merge({'for': id}) %}
+            {% endif %}
+            {% if inline is defined and inline %}
+                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' checkbox-inline')|trim}) %}
+            {% endif %}
+            {% if required %}
+                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+            {% endif %}
+            {% if label is empty %}
+                {% set label = name|humanize %}
+            {% endif %}
+            <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
+            {{ block('checkbox_widget') }}
+            {{ label|trans({}, translation_domain)|raw -}}
+            </label>
+        {% else %}
+            {{ block('checkbox_widget') }}
+        {% endif %}
+        {% endset %}
+        {{ form_errors(form) }}
+
+        {{ block('form_help') }}
+
+        {% if inline is defined and inline %}
+            {{ checkboxdata|raw }}
+        {% else %}
+            {{ checkboxdata|raw }}<br>
+        {% endif %}
+
+    {% endspaceless %}
+{% endblock checkbox_row %}
+
+{% block radio_row %}
+    {% spaceless %}
+        {% set radiodata %}
+        {% if label is not same as (false) %}
+            {% if not compound %}
+                {% set label_attr = label_attr|merge({'for': id}) %}
+            {% endif %}
+            {% if inline is defined and inline %}
+                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' radio-inline')|trim}) %}
+            {% endif %}
+            {% if required %}
+                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+            {% endif %}
+            {% if label is empty %}
+                {% set label = name|humanize %}
+            {% endif %}
+            <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
+            {{ block('radio_widget') }}
+            {{ label|trans({}, translation_domain)|raw -}}
+            </label>
+        {% else %}
+            {{ block('radio_widget') }}
+        {% endif %}
+        {{ form_errors(form) }}
+        {% endset %}
+
+        {% if inline is defined and inline %}
+            {{ radiodata|raw }}
+        {% else%}
+            {{ radiodata|raw }}<br>
+        {% endif %}
+
+        {{ block('form_help') }}
+    {% endspaceless %}
+{% endblock radio_row %}
+
+{# form widget #}
+
+{% block form_start %}
+    {% spaceless %}
+        {{ uikit_backup_form_settings() }}
+        {% set method = method|upper %}
+        {% if method in ["GET", "POST"] %}
+            {% set form_method = method %}
+        {% else %}
+            {% set form_method = "POST" %}
+        {% endif %}
+
+        {% if layout_modifier is defined %}
+            {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-' ~ layout_modifier)|trim }) %}
+            {{ uikit_set_layout_modifier(layout_modifier) }}
+        {% endif %}
+
+        <form  name="{{ form.vars.name }}" method="{{ form_method|lower }}" action="{{ action }}"{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}{% if multipart %} enctype="multipart/form-data"{% endif %}>
+        {% if form_method != method %}
+            <input type="hidden" name="_method" value="{{ method }}" />
+        {% endif %}
+   {% endspaceless %}
+{% endblock form_start %}
+
+{% block form_help %}
+    {% spaceless %}
+        {% set help_text = attr.help_text is defined and attr.help_text is not empty ? attr.help_text : "" %}
+        {% set help_type = attr.help_type is defined and attr.help_type is not empty ? attr.help_type : "" %}
+        {% if help_text is not empty %}
+            {% if help_type is same as("block") %}
+                <p class="uk-form-help-block">{{help_text|trans({}, translation_domain)}}</p>
+            {% else %}
+                <span class="uk-form-help-inline">{{help_text|trans({}, translation_domain)}}</span>
+            {% endif %}
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_help %}
+
+{# Labels #}
+
+{% block form_label %}
+    {% spaceless %}
+        {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+        {% set col_size = col_size|default(uikit_get_col_size()) %}
+
+        {% if attr.col_size is defined and attr.col_size is not empty %}
+            {% set col_size = attr.col_size %}
+        {% endif %}
+
+        {% if label is not sameas(false) %}
+
+            {% set label_attr = label_attr|merge({ 'class': (label_attr.class|default('') ~ ' uk-form-label')|trim }) %}
+
+            {% if not compound %}
+                {% set label_attr = label_attr|merge({'for': id}) %}
+            {% endif %}
+            {% if required %}
+                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+            {% endif %}
+            {% if label is empty %}
+                {% set label = name|humanize %}
+            {% endif %}
+            <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>{{ label|trans({}, translation_domain)|raw }}</label>
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_label %}
+
+{% block button_label %}{% endblock %}
+
+{# Rows #}
+
+{% block form_row %}
+    {% spaceless %}
+        <div class="uk-form-row">
+            {{ form_label(form) }}
+            {{ form_widget(form) }}
+            {{ form_errors(form) }}
+        </div>
+    {% endspaceless %}
+{% endblock %}
+
+{# Support #}
+
+{% block form_rows %}
+    {% spaceless %}
+        {% for child in form %}
+            {% set childAttr = {} %}
+            {% if attr.col_size is defined %}
+                {% set childAttr = childAttr|merge({ 'col_size': attr.col_size }) %}
+            {% endif %}
+            {% if attr.layout_modifier is defined %}
+                {% set childAttr = childAttr|merge({ 'layout_modifier': attr.layout_modifier }) %}
+            {% endif %}
+            {{ form_row(child, childAttr) }}
+        {% endfor %}
+    {% endspaceless %}
+{% endblock form_rows %}
+
+{% block widget_attributes %}
+    {% spaceless %}
+        id="{{ id }}" name="{{ full_name }}"{% if read_only %} readonly="readonly"{% endif %}{% if disabled %} disabled="disabled"{% endif %}{% if required %} required="required"{% endif %}{% if max_length %} maxlength="{{ max_length }}"{% endif %}{% if pattern %} pattern="{{ pattern }}"{% endif %}
+        {% for attrname, attrvalue in attr %}{% if attrname in ['placeholder', 'title'] %}{{ attrname }}="{{ attrvalue|trans({}, translation_domain) }}" {% elseif attrname in ['input_group'] %}{% else %}{{ attrname }}="{{ attrvalue }}" {% endif %}{% endfor %}
+    {% endspaceless %}
+{% endblock widget_attributes %}
+
+{% block widget_container_attributes %}
+    {% spaceless %}
+        {% if attr.style is defined and (attr.style == 'inline' or attr.style == 'horizontal') %}
+            {% set attr = attr|merge({ 'class': ('form-'~attr.style~' '~attr.class|default(''))|trim }) %}
+            {% set attr = attr|merge({ 'style': null }) %}
+        {% endif %}
+        {% if id is not empty %}id="{{ id }}" {% endif %}
+        {% for attrname, attrvalue in attr %}{% if attrvalue is not null and (attrvalue is not iterable) %}{{ attrname }}="{{ attrvalue }}" {% endif %}{% endfor %}
+    {% endspaceless %}
+{% endblock widget_container_attributes %}
+
+{% block button_attributes -%}
+        id="{{ id }}" name="{{ full_name }}"{% if disabled %} disabled="disabled"{% endif %}
+        {%- for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}
+{% endblock button_attributes %}
+
+{% block form_legend %}
+{% endblock form_legend %}
+
