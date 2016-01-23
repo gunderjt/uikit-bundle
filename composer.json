@@ -7,11 +7,11 @@
     "authors":     [
         {
             "name":     "Jeffrey Gunderson",
-            "email":    "jeffrey.gunderson@gmail.com",
+            "email":    "jeffrey.gunderson@gmail.com"
         }
     ],
     "require":      {
-        "php":                      ">=5.4",
+        "php":                      ">5.4",
         "symfony/framework-bundle": "~2.6|~3.0",
         "symfony/twig-bundle":      "~2.6|~3.0",
         "symfony/form":             "~2.6|~3.0",
@@ -32,5 +32,5 @@
         "knplabs/knp-menu":             "Required to use KnpMenuBundle.",
         "knplabs/knp-menu-bundle":      "BraincraftedBootstrapBundle styles the menus provided by KnpMenuBundle.",
         "uikit/uikit":                  "Uikit provides the assets"
-    },
+    }
 }

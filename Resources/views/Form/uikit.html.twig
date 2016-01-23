@@ -14,9 +14,10 @@
 
 {% block form_widget_simple %}
     {% spaceless %}
-        {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+        {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
         {% set col_size = col_size|default(uikit_get_col_size()) %}
         {% set icon = attr.icon is defined and attr.icon ? attr.icon : "" %}
+
 
         {% if attr.col_size is defined and attr.col_size is not empty %}
             {% set col_size = attr.col_size %}
@@ -33,7 +34,7 @@
 
         {% set attr = attr|merge({ 'class': (attr.class|default(''))|trim }) %}
         {% if icon is not empty %}<i class="uk-icon-{{icon}}"></i>{% endif %}
-        <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}>  {{ block('form_help') }}
+        <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}> {{ block('form_help') }}
 
         {% if icon is not empty %}
             </div>
@@ -70,7 +71,7 @@
 
 {% block textarea_widget %}
     {% spaceless %}
-        {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+        {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
         {% set col_size = col_size|default(uikit_get_col_size()) %}
         {% set help = help|default('') %}
 
@@ -93,12 +94,18 @@
 {% endblock textarea_widget %}
 
 {% block percent_widget %}
+    {% set layout_modifier_temp = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
     {% spaceless %}
+        {% if layout_modifier_temp is not sameas(false)%}
+            <div class="uk-form-controls">
+        {% endif %}
         {% set type = type|default('text') %}
-        <div class="input-group">
+            {% set layout_modifier = false %}
             {{ block('form_widget_simple') }}
-            <span class="input-group-addon">%</span>
-        </div>
+            <span>%</span>
+        {% if layout_modifier_temp is not sameas(false) %}
+            </div>
+        {% endif %}
     {% endspaceless %}
 {% endblock percent_widget %}
 
@@ -113,7 +120,7 @@
 {% endblock choice_widget %}
 
 {% block choice_widget_expanded %}
-    {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+    {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
     {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-controls')|trim }) %}
     {% set attr = layout_modifier is sameas(false) ? attr : attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-controls')|trim }) %}
     {% spaceless %}
@@ -131,7 +138,7 @@
 
 {% block choice_widget_collapsed %}
     {% spaceless %}
-        {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
+        {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
         {% set attr = attr|merge({ 'class': attr.class|default('')|trim }) %}
         {% if layout_modifier is not sameas(false) %}
             <div class="uk-form-controls">
@@ -228,6 +235,72 @@
         {{ block('form_help') }}
     {% endspaceless %}
 {% endblock radio_row %}
+
+{% block datetime_widget %}
+    {% spaceless %}
+        {% if widget == 'single_text' %}
+            {{ block('form_widget_simple') }}
+        {% else %}
+            {% set attr = attr|merge({ 'class': 'uk-form-controls uikit-datetime' }) %}
+            <div {{ block('widget_container_attributes') }}>
+                {{ form_widget(form.date, {layout_modifier: false}) }}
+                {{ form_widget(form.time, {layout_modifier: false}) }}
+                {{ form_errors(form.date) }}
+                {{ form_errors(form.time) }}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock datetime_widget %}
+
+{% block date_widget %}
+    {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
+    {% spaceless %}
+        {% if widget == 'single_text' %}
+            {{ block('form_widget_simple') }}
+        {% else %}
+            {% set attr = attr|merge({ 'class': 'uikit-date' }) %}
+            {% set attr = layout_modifier is not sameas(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
+            <div {{ block('widget_container_attributes') }}>
+                {{ date_pattern|replace({
+                '{{ year }}':  form_widget(form.year, {layout_modifier: false}),
+                '{{ month }}': form_widget(form.month, {layout_modifier: false}),
+                '{{ day }}':   form_widget(form.day, {layout_modifier: false}),
+                })|raw }}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock date_widget %}
+
+{% block time_widget %}
+    {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
+    {% spaceless %}
+        {% if widget == 'single_text' %}
+            {{ block('form_widget_simple') }}
+        {% else %}
+            {% set vars = widget == 'text' ? { 'attr': { 'size': 1 } } : {} %}
+            {% set vars = vars|merge({'layout_modifier': false})%}
+            {% set attr = attr|merge({ 'class': 'uikit-time' }) %}
+            {% set attr = layout_modifier is not sameas(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
+            <div {{ block('widget_container_attributes') }}>
+                {{ form_widget(form.hour, vars) }}
+                {% if with_minutes %}:{{ form_widget(form.minute, vars) }}{% endif %}
+                {% if with_seconds %}:{{ form_widget(form.second, vars) }}{% endif %}
+            </div>
+        {% endif %}
+    {% endspaceless %}
+{% endblock time_widget %}
+
+{% block money_widget %}
+    {% spaceless %}
+        {% set icon = attr.icon is defined and attr.icon ? attr.icon : "usd" %}
+        {% set attr = attr|merge({'icon' : icon})%}
+        {{block("form_widget_simple")}}
+    {% endspaceless %}
+{% endblock money_widget %}
+
+{% block hidden_row %}
+    {{ form_widget(form) }}
+{% endblock hidden_row %}
 
 {# form widget #}
 
