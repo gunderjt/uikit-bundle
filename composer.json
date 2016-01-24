@@ -32,5 +32,8 @@
         "knplabs/knp-menu":             "Required to use KnpMenuBundle.",
         "knplabs/knp-menu-bundle":      "BraincraftedBootstrapBundle styles the menus provided by KnpMenuBundle.",
         "uikit/uikit":                  "Uikit provides the assets"
+    },
+    "autoload": {
+        "psr-4": { "Gunderjt\\UikitBundle\\": "" }
     }
 }
