@@ -21,7 +21,7 @@ use Twig_SimpleFunction;
 class UikitFormExtension extends Twig_Extension
 {
     /** @var string */
-    private $layoutModifier = null;
+    private $layoutModifier = false;
 
     /** @var string */
     private $widthModifier = null;
@@ -33,7 +33,7 @@ class UikitFormExtension extends Twig_Extension
     private $colSize = null;  //eg. 'medium-1-2', or '1-1'  its appended to 'uk-width-'
 
     /** @var bool */
-    private $simpleCol = false;
+    private $simpleRow = true;
 
     /** @var array */
     private $settingsStack = array();
@@ -52,8 +52,8 @@ class UikitFormExtension extends Twig_Extension
             new Twig_SimpleFunction('uikit_set_size_modifier', array($this, 'setSizeModifier')),
             new Twig_SimpleFunction('uikit_set_col_size', array($this, 'setColSize')),
             new Twig_SimpleFunction('uikit_get_col_size', array($this, 'getColSize')),
-            new Twig_SimpleFunction('uikit_set_simple_col', array($this, 'setSimpleCol')),
-            new Twig_SimpleFunction('uikit_get_simple_col', array($this, 'getSimpleCol')),
+            new Twig_SimpleFunction('uikit_set_simple_row', array($this, 'setSimpleRow')),
+            new Twig_SimpleFunction('uikit_get_simple_row', array($this, 'getSimpleRow')),
             new Twig_SimpleFunction('uikit_backup_form_settings', array($this, 'backupFormSettings')),
             new Twig_SimpleFunction('uikit_restore_form_settings', array($this, 'restoreFormSettings')),
             new Twig_SimpleFunction(
@@ -170,11 +170,11 @@ class UikitFormExtension extends Twig_Extension
     /**
      * Sets the number of columns of simple widgets.
      *
-     * @param integer $simpleCol Number of columns.
+     * @param integer $simpleRow Number of columns.
      */
-    public function setSimpleCol($simpleCol)
+    public function setSimpleRow($simpleRow)
     {
-        $this->simpleCol = $simpleCol;
+        $this->simpleRow = $simpleRow ? true : false;
     }
 
     /**
@@ -182,9 +182,9 @@ class UikitFormExtension extends Twig_Extension
      *
      * @return integer Number of columns.
      */
-    public function getSimpleCol()
+    public function getSimpleRow()
     {
-        return $this->simpleCol;
+        return $this->simpleRow;
     }
 
     /**
@@ -199,7 +199,7 @@ class UikitFormExtension extends Twig_Extension
         $settings = array(
             '$layoutModifier' => $this->layoutModifier,
             'colSize'   => $this->colSize,
-            'simpleCol' => $this->simpleCol,
+            'simpleRow' => $this->simpleRow,
         );
 
         array_push($this->settingsStack, $settings);
@@ -221,7 +221,7 @@ class UikitFormExtension extends Twig_Extension
 
         $this->layoutModifier = $settings['layoutModifier'];
         $this->colSize   = $settings['colSize'];
-        $this->simpleCol = $settings['simpleCol'];
+        $this->simpleRow = $settings['simpleRow'];
     }
 
     /**

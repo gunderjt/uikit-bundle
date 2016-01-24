@@ -26,6 +26,7 @@
         {% set type = type|default('text') %}
 
         {% if layout_modifier is not sameas(false) %}
+            {{dump(layout_modifier)}}
             <div class="uk-form-controls">
         {% endif %}
         {% if icon is not empty %}
@@ -319,6 +320,10 @@
             {{ uikit_set_layout_modifier(layout_modifier) }}
         {% endif %}
 
+        {% if simple_row is defined %}
+            {{ uikit_set_simple_row(simple_row) }}
+        {% endif %}
+
         <form  name="{{ form.vars.name }}" method="{{ form_method|lower }}" action="{{ action }}"{% for attrname, attrvalue in attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}{% if multipart %} enctype="multipart/form-data"{% endif %}>
         {% if form_method != method %}
             <input type="hidden" name="_method" value="{{ method }}" />
@@ -375,11 +380,15 @@
 
 {% block form_row %}
     {% spaceless %}
-        <div class="uk-form-row">
+        {% if simple_row is defined ? (simple_row ? true : false) : uikit_get_simple_row() %}
+            <div class="uk-form-row">
+        {% endif %}
             {{ form_label(form) }}
             {{ form_widget(form) }}
             {{ form_errors(form) }}
-        </div>
+        {% if simple_row is defined ? (simple_row ? true : false) : uikit_get_simple_row() %}
+            </div>
+        {% endif %}
     {% endspaceless %}
 {% endblock %}
 
@@ -409,10 +418,6 @@
 
 {% block widget_container_attributes %}
     {% spaceless %}
-        {% if attr.style is defined and (attr.style == 'inline' or attr.style == 'horizontal') %}
-            {% set attr = attr|merge({ 'class': ('form-'~attr.style~' '~attr.class|default(''))|trim }) %}
-            {% set attr = attr|merge({ 'style': null }) %}
-        {% endif %}
         {% if id is not empty %}id="{{ id }}" {% endif %}
         {% for attrname, attrvalue in attr %}{% if attrvalue is not null and (attrvalue is not iterable) %}{{ attrname }}="{{ attrvalue }}" {% endif %}{% endfor %}
     {% endspaceless %}

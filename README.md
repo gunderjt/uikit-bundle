@@ -75,7 +75,17 @@ or
 ```php
 ->add('text_icon_clock', "text", array("attr" => array("icon" => "clock-o", "placeholder" =>  "Date")))
 ```
+## Form-Row
 
+By default a uk-form-row class will be added to each individual form element.  To turn off this behavior you can either:
+
+```
+{{uikit_set_simple_row(false)}}
+```
+or
+```
+{{form_row(form.element, {simple_row: false})}}
+```
 
 TODO:  
 Configure which javascript modules you want you want to use in config.yml, 
