@@ -170,9 +170,6 @@
             {% if not compound %}
                 {% set label_attr = label_attr|merge({'for': id}) %}
             {% endif %}
-            {% if inline is defined and inline %}
-                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' checkbox-inline')|trim}) %}
-            {% endif %}
             {% if required %}
                 {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
             {% endif %}
@@ -305,6 +302,7 @@
 {# form widget #}
 
 {% block form_start %}
+    {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
     {% spaceless %}
         {{ uikit_backup_form_settings() }}
         {% set method = method|upper %}
@@ -314,7 +312,7 @@
             {% set form_method = "POST" %}
         {% endif %}
 
-        {% if layout_modifier is defined %}
+        {% if layout_modifier %}
             {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-' ~ layout_modifier)|trim }) %}
             {{ uikit_set_layout_modifier(layout_modifier) }}
         {% endif %}
