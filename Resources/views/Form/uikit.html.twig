@@ -25,7 +25,7 @@
 
         {% set type = type|default('text') %}
 
-        {% if layout_modifier is not sameas(false) %}
+        {% if layout_modifier is not same as(false) %}
             <div class="uk-form-controls">
         {% endif %}
         {% if icon is not empty %}
@@ -39,7 +39,7 @@
         {% if icon is not empty %}
             </div>
         {% endif %}
-        {% if layout_modifier is not sameas(false) %}
+        {% if layout_modifier is not same as(false) %}
             </div>
         {% endif %}
     {% endspaceless %}
@@ -79,7 +79,7 @@
             {% set col_size = attr.col_size %}
         {% endif %}
 
-        {% if layout_modifier is not sameas(false) %}
+        {% if layout_modifier is not same as(false) %}
             <div class="uk-form-controls">
         {% endif %}
 
@@ -87,7 +87,7 @@
 
         <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
 
-        {% if layout_modifier is not sameas(false) %}
+        {% if layout_modifier is not same as(false) %}
             </div>
         {% endif %}
     {% endspaceless %}
@@ -96,14 +96,14 @@
 {% block percent_widget %}
     {% set layout_modifier_temp = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
     {% spaceless %}
-        {% if layout_modifier_temp is not sameas(false)%}
+        {% if layout_modifier_temp is not same as(false)%}
             <div class="uk-form-controls">
         {% endif %}
         {% set type = type|default('text') %}
             {% set layout_modifier = false %}
             {{ block('form_widget_simple') }}
             <span>%</span>
-        {% if layout_modifier_temp is not sameas(false) %}
+        {% if layout_modifier_temp is not same as(false) %}
             </div>
         {% endif %}
     {% endspaceless %}
@@ -122,7 +122,7 @@
 {% block choice_widget_expanded %}
     {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
     {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-controls')|trim }) %}
-    {% set attr = layout_modifier is sameas(false) ? attr : attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-controls')|trim }) %}
+    {% set attr = layout_modifier is same as(false) ? attr : attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-controls')|trim }) %}
     {% spaceless %}
         <div {{ block('widget_container_attributes') }}>
             {% for child in form %}
@@ -140,7 +140,7 @@
     {% spaceless %}
         {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
         {% set attr = attr|merge({ 'class': attr.class|default('')|trim }) %}
-        {% if layout_modifier is not sameas(false) %}
+        {% if layout_modifier is not same as(false) %}
             <div class="uk-form-controls">
         {% endif %}
             <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
@@ -157,7 +157,7 @@
                 {% set options = choices %}
                 {{ block('choice_widget_options') }}
             </select>
-        {% if layout_modifier is not sameas(false) %}
+        {% if layout_modifier is not same as(false) %}
             </div>
         {% endif %}
     {% endspaceless %}
@@ -196,6 +196,21 @@
 
     {% endspaceless %}
 {% endblock checkbox_row %}
+
+{% block number_widget %}
+    {% spaceless %}
+        {# type="number" doesn't work with floats #}
+        {% set type = type|default('text') %}
+        {{ block('form_widget_simple') }}
+    {% endspaceless %}
+{% endblock number_widget %}
+
+{% block integer_widget %}
+    {% spaceless %}
+        {% set type = type|default('number') %}
+        {{ block('form_widget_simple') }}
+    {% endspaceless %}
+{% endblock integer_widget %}
 
 {% block radio_row %}
     {% spaceless %}
@@ -256,7 +271,7 @@
             {{ block('form_widget_simple') }}
         {% else %}
             {% set attr = attr|merge({ 'class': 'uikit-date' }) %}
-            {% set attr = layout_modifier is not sameas(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
+            {% set attr = layout_modifier is not same as(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
             <div {{ block('widget_container_attributes') }}>
                 {{ date_pattern|replace({
                 '{{ year }}':  form_widget(form.year, {layout_modifier: false}),
@@ -277,7 +292,7 @@
             {% set vars = widget == 'text' ? { 'attr': { 'size': 1 } } : {} %}
             {% set vars = vars|merge({'layout_modifier': false})%}
             {% set attr = attr|merge({ 'class': 'uikit-time' }) %}
-            {% set attr = layout_modifier is not sameas(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
+            {% set attr = layout_modifier is not same as(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
             <div {{ block('widget_container_attributes') }}>
                 {{ form_widget(form.hour, vars) }}
                 {% if with_minutes %}:{{ form_widget(form.minute, vars) }}{% endif %}
@@ -353,7 +368,7 @@
             {% set col_size = attr.col_size %}
         {% endif %}
 
-        {% if label is not sameas(false) %}
+        {% if label is not same as(false) %}
 
             {% set label_attr = label_attr|merge({ 'class': (label_attr.class|default('') ~ ' uk-form-label')|trim }) %}
 
