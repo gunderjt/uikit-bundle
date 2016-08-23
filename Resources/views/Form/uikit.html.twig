@@ -15,12 +15,16 @@
 {% block form_widget_simple %}
     {% spaceless %}
         {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
-        {% set col_size = col_size|default(uikit_get_col_size()) %}
+        {% set input_class = input_class|default(uikit_get_input_class()) %}
         {% set icon = attr.icon is defined and attr.icon ? attr.icon : "" %}
 
 
-        {% if attr.col_size is defined and attr.col_size is not empty %}
-            {% set col_size = attr.col_size %}
+        {% if attr.input_class is defined and attr.input_class is not empty %}
+            {% set input_class = attr.input_class %}
+        {% endif %}
+
+        {% if input_class is not empty %}
+            {% set attr = attr|merge( {'class': attr.class|default('') ~ input_class|trim } ) %}
         {% endif %}
 
         {% set type = type|default('text') %}
@@ -72,18 +76,20 @@
 {% block textarea_widget %}
     {% spaceless %}
         {% set layout_modifier = layout_modifier is defined ? layout_modifier : uikit_get_layout_modifier() %}
-        {% set col_size = col_size|default(uikit_get_col_size()) %}
+        {% set input_class = input_class|default(uikit_get_input_class()) %}
         {% set help = help|default('') %}
 
-        {% if attr.col_size is defined and attr.col_size is not empty %}
-            {% set col_size = attr.col_size %}
+        {% if attr.input_class is defined and attr.input_class is not empty %}
+            {% set input_class = attr.input_class %}
         {% endif %}
 
         {% if layout_modifier is not same as(false) %}
             <div class="uk-form-controls">
         {% endif %}
 
-        {% set attr = attr|merge({ 'class': (attr.class|default(''))|trim }) %}
+        {% if input_class is not empty %}
+            {% set attr = attr|merge( {'class': attr.class|default('') ~ input_class|trim } ) %}
+        {% endif %}
 
         <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
 
@@ -166,23 +172,29 @@
 {% block checkbox_row %}
     {% spaceless %}
         {% set checkboxdata %}
-        {% if label is not same as (false) %}
-            {% if not compound %}
-                {% set label_attr = label_attr|merge({'for': id}) %}
+            {% if simple_row is defined ? (simple_row ? true : false) : uikit_get_simple_row() %}
+                <div class="uk-form-row">
             {% endif %}
-            {% if required %}
-                {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+            {% if label is not same as (false) %}
+                {% if not compound %}
+                    {% set label_attr = label_attr|merge({'for': id}) %}
+                {% endif %}
+                {% if required %}
+                    {% set label_attr = label_attr|merge({'class': (label_attr.class|default('') ~ ' required')|trim}) %}
+                {% endif %}
+                {% if label is empty %}
+                    {% set label = name|humanize %}
+                {% endif %}
+                <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
+                {{ block('checkbox_widget') }}
+                {{ label|trans({}, translation_domain)|raw -}}
+                </label>
+            {% else %}
+                {{ block('checkbox_widget') }}
             {% endif %}
-            {% if label is empty %}
-                {% set label = name|humanize %}
+            {% if simple_row is defined ? (simple_row ? true : false) : uikit_get_simple_row() %}
+                </div>
             {% endif %}
-            <label{% for attrname, attrvalue in label_attr %} {{ attrname }}="{{ attrvalue }}"{% endfor %}>
-            {{ block('checkbox_widget') }}
-            {{ label|trans({}, translation_domain)|raw -}}
-            </label>
-        {% else %}
-            {{ block('checkbox_widget') }}
-        {% endif %}
         {% endset %}
         {{ form_errors(form) }}
 
@@ -196,6 +208,10 @@
 
     {% endspaceless %}
 {% endblock checkbox_row %}
+
+{%- block checkbox_widget -%}
+    <input type="checkbox" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} {% if required %}required="required" {% endif %} />
+{%- endblock checkbox_widget -%}
 
 {% block number_widget %}
     {% spaceless %}
@@ -253,7 +269,7 @@
         {% if widget == 'single_text' %}
             {{ block('form_widget_simple') }}
         {% else %}
-            {% set attr = attr|merge({ 'class': 'uk-form-controls uikit-datetime' }) %}
+            {% set attr = attr|merge({ 'class': 'uk-form-controls' }) %}
             <div {{ block('widget_container_attributes') }}>
                 {{ form_widget(form.date, {layout_modifier: false}) }}
                 {{ form_widget(form.time, {layout_modifier: false}) }}
@@ -271,7 +287,7 @@
             {{ block('form_widget_simple') }}
         {% else %}
             {% set attr = attr|merge({ 'class': 'uikit-date' }) %}
-            {% set attr = layout_modifier is not same as(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
+            {% set attr = layout_modifier is not same as(false) ? attr|merge({"class": attr.class|default('') ~ " uk-form-controls"}) : attr %}
             <div {{ block('widget_container_attributes') }}>
                 {{ date_pattern|replace({
                 '{{ year }}':  form_widget(form.year, {layout_modifier: false}),
@@ -291,8 +307,7 @@
         {% else %}
             {% set vars = widget == 'text' ? { 'attr': { 'size': 1 } } : {} %}
             {% set vars = vars|merge({'layout_modifier': false})%}
-            {% set attr = attr|merge({ 'class': 'uikit-time' }) %}
-            {% set attr = layout_modifier is not same as(false) ? attr|merge({"class": attr.class ~ " uk-form-controls"}) : attr %}
+            {% set attr = layout_modifier is not same as(false) ? attr|merge({"class": attr.class|default('') ~ " uk-form-controls"}) : attr %}
             <div {{ block('widget_container_attributes') }}>
                 {{ form_widget(form.hour, vars) }}
                 {% if with_minutes %}:{{ form_widget(form.minute, vars) }}{% endif %}
@@ -326,6 +341,8 @@
         {% else %}
             {% set form_method = "POST" %}
         {% endif %}
+
+        {% set attr = attr|merge({'class': attr.class|default('') ~ ' uk-form '} )%}
 
         {% if layout_modifier %}
             {% set attr = attr|merge({ 'class': (attr.class|default('') ~ ' uk-form-' ~ layout_modifier)|trim }) %}
@@ -362,12 +379,6 @@
 {% block form_label %}
     {% spaceless %}
         {% set layout_modifier = layout_modifier|default(uikit_get_layout_modifier()) %}
-        {% set col_size = col_size|default(uikit_get_col_size()) %}
-
-        {% if attr.col_size is defined and attr.col_size is not empty %}
-            {% set col_size = attr.col_size %}
-        {% endif %}
-
         {% if label is not same as(false) %}
 
             {% set label_attr = label_attr|merge({ 'class': (label_attr.class|default('') ~ ' uk-form-label')|trim }) %}
@@ -410,8 +421,8 @@
     {% spaceless %}
         {% for child in form %}
             {% set childAttr = {} %}
-            {% if attr.col_size is defined %}
-                {% set childAttr = childAttr|merge({ 'col_size': attr.col_size }) %}
+            {% if attr.input_class is defined %}
+                {% set childAttr = childAttr|merge({ 'input_class': attr.input_class }) %}
             {% endif %}
             {% if attr.layout_modifier is defined %}
                 {% set childAttr = childAttr|merge({ 'layout_modifier': attr.layout_modifier }) %}
@@ -442,4 +453,20 @@
 
 {% block form_legend %}
 {% endblock form_legend %}
+
+{% block form_errors %}
+{% spaceless %}
+    {% if errors|length > 0 %}
+    <ul class="uk-alert uk-alert-warning">
+        {% for error in errors %}
+            <li>{{
+                error.messagePluralization is null
+                    ? error.messageTemplate|trans(error.messageParameters, 'validators')
+                    : error.messageTemplate|transchoice(error.messagePluralization, error.messageParameters, 'validators')
+            }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% endspaceless %}
+{% endblock form_errors %}
 

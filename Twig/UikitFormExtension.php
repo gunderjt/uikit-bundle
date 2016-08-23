@@ -24,13 +24,7 @@ class UikitFormExtension extends Twig_Extension
     private $layoutModifier = false;
 
     /** @var string */
-    private $widthModifier = null;
-
-    /** @var string */
-    private $sizeModifier = null;
-
-    /** @var string */
-    private $colSize = null;  //eg. 'medium-1-2', or '1-1'  its appended to 'uk-width-'
+    private $inputClass = null;  //eg. 'uk-width-medium-1-2', or 'uk-width-1-1'
 
     /** @var bool */
     private $simpleRow = true;
@@ -46,12 +40,8 @@ class UikitFormExtension extends Twig_Extension
         return array(
             new Twig_SimpleFunction('uikit_set_layout_modifier', array($this, 'setLayoutModifier')),
             new Twig_SimpleFunction('uikit_get_layout_modifier', array($this, 'getLayoutModifier')),
-            new Twig_SimpleFunction('uikit_set_width_modifier', array($this, 'setWidthModifier')),
-            new Twig_SimpleFunction('uikit_get_width_modifier', array($this, 'getWidthModifier')),
-            new Twig_SimpleFunction('uikit_get_size_modifier', array($this, 'getSizeModifier')),
-            new Twig_SimpleFunction('uikit_set_size_modifier', array($this, 'setSizeModifier')),
-            new Twig_SimpleFunction('uikit_set_col_size', array($this, 'setColSize')),
-            new Twig_SimpleFunction('uikit_get_col_size', array($this, 'getColSize')),
+            new Twig_SimpleFunction('uikit_set_input_class', array($this, 'setInputClass')),
+            new Twig_SimpleFunction('uikit_get_input_class', array($this, 'getInputClass')),
             new Twig_SimpleFunction('uikit_set_simple_row', array($this, 'setSimpleRow')),
             new Twig_SimpleFunction('uikit_get_simple_row', array($this, 'getSimpleRow')),
             new Twig_SimpleFunction('uikit_backup_form_settings', array($this, 'backupFormSettings')),
@@ -90,7 +80,7 @@ class UikitFormExtension extends Twig_Extension
     /**
      * Sets the layout modifier.
      *
-     * @param string $layout_modifier Name of the layout_modifier ('horizontal', 'verticle')
+     * @param string $layout_modifier Name of the layout_modifier ('horizontal', 'stacked')
      */
     public function setLayoutModifier($layoutModifier)
     {
@@ -108,53 +98,13 @@ class UikitFormExtension extends Twig_Extension
     }
 
     /**
-     * Sets the uikit width modifier.
-     *
-     * @param string $widthModifier Name of the widthModifier ('large', 'medium', 'small', 'mini')
-     */
-    public function setWidthModifier($widthModifier)
-    {
-        $this->widthModifier = $widthModifier;
-    }
-
-    /**
-     * Returns the width modifier.
-     *
-     * @return string Name of the width modifier
-     */
-    public function getWidthModifier()
-    {
-        return $this->widthModifier;
-    }
-
-    /**
-     * Sets the uikit size modifier.
-     *
-     * @param string $sizeModifier Name of the sizeModifier ('horizontal', 'verticle')
-     */
-    public function setSizeModifier($sizeModifier)
-    {
-        $this->sizeModifier = $sizeModifier;
-    }
-
-    /**
-     * Returns the size modifier.
-     *
-     * @return string Name of the size modifier
-     */
-    public function getSizeModifier()
-    {
-        return $this->sizeModifier;
-    }
-
-    /**
      * Sets the column size.
      *
-     * @param string $colSize Column size (xs, sm, md or lg)
+     * @param string $class is added to input, ease for changing classes of input elements
      */
-    public function setColSize($colSize)
+    public function setInputClass($inputClass)
     {
-        $this->colSize = $colSize;
+        $this->inputClass = $inputClass;
     }
 
     /**
@@ -162,9 +112,9 @@ class UikitFormExtension extends Twig_Extension
      *
      * @return string Column size (xs, sm, md or lg)
      */
-    public function getColSize()
+    public function getInputClass()
     {
-        return $this->colSize;
+        return $this->inputClass;
     }
 
     /**
@@ -197,8 +147,8 @@ class UikitFormExtension extends Twig_Extension
     public function backupFormSettings()
     {
         $settings = array(
-            '$layoutModifier' => $this->layoutModifier,
-            'colSize'   => $this->colSize,
+            'layoutModifier' => $this->layoutModifier,
+            'inputClass'   => $this->inputClass,
             'simpleRow' => $this->simpleRow,
         );
 
@@ -220,7 +170,7 @@ class UikitFormExtension extends Twig_Extension
         $settings = array_pop($this->settingsStack);
 
         $this->layoutModifier = $settings['layoutModifier'];
-        $this->colSize   = $settings['colSize'];
+        $this->inputClass = $settings['inputClass'];
         $this->simpleRow = $settings['simpleRow'];
     }
 
