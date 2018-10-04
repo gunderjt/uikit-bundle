@@ -52,9 +52,6 @@
 {% block form_widget_compound %}
     {% spaceless %}
         <div {{ block('widget_container_attributes') }}>
-            {% if form.parent is empty %}
-                {{ block('global_form_errors') }}
-            {% endif %}
             {{ block('form_rows') }}
             {{ form_rest(form) }}
         </div>
